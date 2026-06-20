@@ -729,6 +729,8 @@ async function handleBuyerRegistered(payload) {
         address = EXCLUDED.address,
         occurred_at = EXCLUDED.occurred_at,
         raw_payload = EXCLUDED.raw_payload
+      WHERE buyers_projection.occurred_at IS NULL
+         OR EXCLUDED.occurred_at >= buyers_projection.occurred_at
     `,
     [buyerId, name, email, phone, address, occurredAt, payload]
   );
@@ -749,36 +751,44 @@ async function handleBasketCreated(payload) {
   try {
     await client.query("BEGIN");
 
-    await client.query(
+    const result = await client.query(
       `
-        INSERT INTO catalog_baskets_projection (basket_id, species, quantity, unit, quality, base_price, boat_name, occurred_at, raw_payload)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        ON CONFLICT (basket_id) DO UPDATE SET
-          species = EXCLUDED.species,
-          quantity = EXCLUDED.quantity,
-          unit = EXCLUDED.unit,
-          quality = EXCLUDED.quality,
-          base_price = EXCLUDED.base_price,
-          boat_name = EXCLUDED.boat_name,
-          occurred_at = EXCLUDED.occurred_at,
-          raw_payload = EXCLUDED.raw_payload
+        WITH upserted AS (
+          INSERT INTO catalog_baskets_projection (basket_id, species, quantity, unit, quality, base_price, boat_name, occurred_at, raw_payload)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          ON CONFLICT (basket_id) DO UPDATE SET
+            species = EXCLUDED.species,
+            quantity = EXCLUDED.quantity,
+            unit = EXCLUDED.unit,
+            quality = EXCLUDED.quality,
+            base_price = EXCLUDED.base_price,
+            boat_name = EXCLUDED.boat_name,
+            occurred_at = EXCLUDED.occurred_at,
+            raw_payload = EXCLUDED.raw_payload
+          WHERE catalog_baskets_projection.occurred_at IS NULL
+             OR EXCLUDED.occurred_at >= catalog_baskets_projection.occurred_at
+          RETURNING basket_id
+        )
+        SELECT * FROM upserted;
       `,
       [basketId, species, quantity, unit, quality, basePrice, boatName, occurredAt, payload]
     );
 
-    const detailsReady = basePrice !== null;
-    await client.query(
-      `
-        UPDATE auction_baskets
-        SET
-          description = COALESCE(description, $2),
-          base_price = COALESCE(base_price, $3),
-          details_ready = details_ready OR $4,
-          updated_at = NOW()
-        WHERE basket_id = $1
-      `,
-      [basketId, species, basePrice, detailsReady]
-    );
+    if (result.rows.length > 0) {
+      const detailsReady = basePrice !== null;
+      await client.query(
+        `
+          UPDATE auction_baskets
+          SET
+            description = COALESCE(description, $2),
+            base_price = COALESCE(base_price, $3),
+            details_ready = details_ready OR $4,
+            updated_at = NOW()
+          WHERE basket_id = $1
+        `,
+        [basketId, species, basePrice, detailsReady]
+      );
+    }
 
     await client.query("COMMIT");
     console.log(`Idempotently stored basket details and enriched for basket ${basketId}`);
