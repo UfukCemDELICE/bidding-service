@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "fulfillment.auction.closed",
+  "title": "fulfillment.auction.closed",
+  "description": "All post-auction fulfillment responsibilities have been completed and the auction is closed. Produced by the Post-Auction & Fulfillment Service (4).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eventId", "sessionId", "totalSales", "totalRevenue", "totalCaptainPayments", "closedAt", "occurredAt"],
+  "properties": {
+    "eventName": { "type": "string", "description": "Optional self-describing event type; equals the topic name. Not required." },
+    "eventId": { "type": "string", "format": "uuid" },
+    "sessionId": { "type": "string", "minLength": 1 },
+    "totalSales": { "type": "integer", "minimum": 0 },
+    "totalRevenue": { "type": "number", "minimum": 0 },
+    "totalCaptainPayments": { "type": "number", "minimum": 0 },
+    "closedAt": { "type": "string", "format": "date-time" },
+    "occurredAt": { "type": "string", "format": "date-time" }
+  }
+}

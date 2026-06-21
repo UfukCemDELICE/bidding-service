@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Post-Auction & Fulfillment</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2rem;
+        background: #f6f8fb;
+        color: #1d2939;
+      }
+      .card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      }
+      a {
+        color: #0057b8;
+        text-decoration: none;
+      }
+      .muted {
+        color: #667085;
+      }
+    </style>
+  </head>
+  <body data-page="home" data-snapshot-token="<%= snapshotToken %>">
+    <div id="liveBanner" class="card" style="display: none;">Live update received. Refreshing view...</div>
+    <div class="card">
+      <h2>Post-Auction & Fulfillment</h2>
+      <p class="muted">
+        Sales recording, pickup scheduling, delivery availability, captain payout, and auction closing.
+      </p>
+      <p><a href="/fulfillment">Open Post-Auction dashboard →</a></p>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "fulfillment.sale.recorded",
+  "title": "fulfillment.sale.recorded",
+  "description": "A sale record has been created for a sold basket. Produced by the Post-Auction & Fulfillment Service (4) after consuming bid.basket.sold.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eventId", "sessionId", "basketId", "buyerId", "winningBidId", "salePrice", "occurredAt"],
+  "properties": {
+    "eventName": { "type": "string", "description": "Optional self-describing event type; equals the topic name. Not required." },
+    "eventId": { "type": "string", "format": "uuid" },
+    "sessionId": { "type": "string", "minLength": 1 },
+    "basketId": { "type": "string", "minLength": 1 },
+    "buyerId": { "type": "string", "minLength": 1 },
+    "winningBidId": { "type": "string", "minLength": 1 },
+    "salePrice": { "type": "number", "exclusiveMinimum": 0 },
+    "occurredAt": { "type": "string", "format": "date-time" }
+  }
+}

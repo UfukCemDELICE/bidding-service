@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Post-Auction Fulfillment</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2rem;
+        background: #f6f8fb;
+        color: #1d2939;
+      }
+      .card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      }
+      a {
+        color: #0057b8;
+        text-decoration: none;
+      }
+      .muted {
+        color: #667085;
+      }
+      .badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
+      }
+      .badge-recorded {
+        background: #e0f2fe;
+        color: #075985;
+      }
+      .badge-completed {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .badge-pending {
+        background: #fef9c3;
+        color: #854d0e;
+      }
+      .danger {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      /* Stats row */
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .stat-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      }
+      .stat-label {
+        font-size: 0.8rem;
+        color: #667085;
+        margin-bottom: 0.25rem;
+      }
+      .stat-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+      }
+
+      /* Sale cards */
+      .sale-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      }
+      .sale-card.completed {
+        border-left: 4px solid #16a34a;
+        border-radius: 0 12px 12px 0;
+      }
+      .sale-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+      }
+      .sale-title {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.15rem;
+      }
+      .sale-detail {
+        font-size: 0.85rem;
+        color: #667085;
+      }
+      .sale-price {
+        font-size: 1.25rem;
+        font-weight: 700;
+        text-align: right;
+        white-space: nowrap;
+      }
+      .sale-price .currency {
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: #667085;
+      }
+      .badges-row {
+        display: flex;
+        gap: 0.4rem;
+        margin-top: 0.4rem;
+      }
+
+      /* Sale metadata grid */
+      .sale-meta {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.85rem;
+      }
+      .meta-label {
+        color: #667085;
+      }
+      .meta-value {
+        font-weight: 600;
+        margin-top: 0.15rem;
+      }
+
+      /* Action buttons row */
+      .sale-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .action-form {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+        margin: 0;
+      }
+      .action-form input {
+        box-sizing: border-box;
+        padding: 0.45rem 0.65rem;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        font-size: 0.82rem;
+        width: auto;
+        min-width: 120px;
+      }
+      .btn {
+        box-sizing: border-box;
+        padding: 0.5rem 0.85rem;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #1d2939;
+        cursor: pointer;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+      .btn:hover {
+        background: #f6f8fb;
+      }
+      .btn-primary {
+        background: #0057b8;
+        color: #ffffff;
+        border-color: #0057b8;
+      }
+      .btn-primary:hover {
+        background: #004a9e;
+      }
+      .btn-danger {
+        color: #991b1b;
+        border-color: #fca5a5;
+      }
+      .btn-danger:hover {
+        background: #fef2f2;
+      }
+
+      /* Layout */
+      .layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1rem;
+        align-items: start;
+      }
+      .section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        color: #1d2939;
+      }
+
+      /* Session actions */
+      .session-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        margin-bottom: 0.5rem;
+        background: #ffffff;
+      }
+      .session-id {
+        font-size: 0.82rem;
+        font-weight: 600;
+        word-break: break-all;
+      }
+      .session-btns {
+        display: flex;
+        gap: 0.4rem;
+        flex-shrink: 0;
+      }
+
+      /* Captain payouts table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      /* Empty state */
+      .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #667085;
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .stats-row {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .sale-meta {
+          grid-template-columns: 1fr;
+        }
+        .sale-actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .action-form {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .action-form input {
+          width: 100%;
+          min-width: 0;
+        }
+        .session-row {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+        }
+        .session-btns {
+          width: 100%;
+        }
+        .session-btns form {
+          flex: 1;
+        }
+        .session-btns .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body data-page="fulfillment" data-snapshot-token="<%= snapshotToken %>">
+    <div id="liveBanner" class="card" style="display: none;">Live fulfillment update received. Refreshing view...</div>
+
+    <div class="card">
+      <p><a href="/">&#8592; Post-Auction home</a></p>
+      <h2>Post-Auction & Fulfillment</h2>
+      <p class="muted">Sales, pickup scheduling, delivery check, captain payout, and auction closing.</p>
+      <% if (error) { %>
+        <p class="badge danger"><%= error %></p>
+      <% } %>
+    </div>
+
+    <%
+      const sales = dashboard.sales || [];
+      const totalSales = sales.length;
+      const totalRevenue = sales.reduce((sum, s) => sum + Number(s.sale_price || 0), 0);
+      const completedCount = sales.filter(s => s.fulfillment_status === 'COMPLETED').length;
+      const pendingCount = totalSales - completedCount;
+    %>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total sales</div>
+        <div class="stat-value"><%= totalSales %></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Revenue</div>
+        <div class="stat-value" style="color: #16a34a;"><%= totalRevenue.toFixed(2) %></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value" style="color: #854d0e;"><%= pendingCount %></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value" style="color: #16a34a;"><%= completedCount %></div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div>
+        <div class="section-title">Sales</div>
+
+        <% if (!sales.length) { %>
+          <div class="card empty-state">
+            <p>No sales recorded yet. Waiting for <code>bid.basket.sold</code> events.</p>
+          </div>
+        <% } else { %>
+          <% sales.forEach((sale) => {
+            const isCompleted = sale.fulfillment_status === 'COMPLETED';
+            const saleStatus = (sale.sale_status || '').toUpperCase();
+            const fulfillmentStatus = (sale.fulfillment_status || '').toUpperCase();
+          %>
+            <div class="sale-card<%= isCompleted ? ' completed' : '' %>">
+              <div class="sale-header">
+                <div>
+                  <div class="sale-title"><%= sale.species || 'Unknown species' %> &mdash; <%= sale.quantity || '' %> <%= sale.unit || '' %></div>
+                  <div class="sale-detail">
+                    <%= sale.buyer_name || sale.buyer_id %> &middot; <%= sale.buyer_address || 'No address' %>
+                    <% if (sale.boat_name && sale.boat_name !== 'Unknown') { %>
+                      &middot; <%= sale.boat_name %>
+                    <% } %>
+                  </div>
+                  <div class="badges-row">
+                    <span class="badge <%= saleStatus === 'COMPLETED' ? 'badge-completed' : 'badge-recorded' %>"><%= saleStatus %></span>
+                    <span class="badge <%= fulfillmentStatus === 'COMPLETED' ? 'badge-completed' : 'badge-pending' %>"><%= fulfillmentStatus %></span>
+                  </div>
+                </div>
+                <div class="sale-price<%= isCompleted ? '' : '' %>">
+                  <%= Number(sale.sale_price).toFixed(2) %> <span class="currency">TL</span>
+                </div>
+              </div>
+
+              <% if (sale.pickup_location || sale.delivery_reason) { %>
+                <div class="sale-meta">
+                  <% if (sale.pickup_location) { %>
+                    <div>
+                      <div class="meta-label">Pickup</div>
+                      <div class="meta-value"><%= sale.pickup_location %></div>
+                    </div>
+                  <% } %>
+                  <% if (sale.pickup_time_window) { %>
+                    <div>
+                      <div class="meta-label">Time</div>
+                      <div class="meta-value"><%= sale.pickup_time_window %></div>
+                    </div>
+                  <% } %>
+                  <% if (sale.delivery_reason) { %>
+                    <div>
+                      <div class="meta-label">Delivery</div>
+                      <div class="meta-value"><%= sale.delivery_available ? 'Available' : 'Unavailable' %> (<%= sale.delivery_reason %>)</div>
+                    </div>
+                  <% } %>
+                </div>
+              <% } %>
+
+              <div class="sale-actions">
+                <form class="action-form" method="post" action="/fulfillment/sales/<%= sale.basket_id %>/pickup">
+                  <input name="pickupLocation" placeholder="Pickup location" value="<%= sale.pickup_location || 'Fish Auction Pickup Point' %>" />
+                  <input name="pickupTimeWindow" placeholder="Time window" value="<%= sale.pickup_time_window || 'Today 18:00-20:00' %>" />
+                  <button type="submit" class="btn btn-primary">Schedule pickup</button>
+                </form>
+                <form class="action-form" method="post" action="/fulfillment/sales/<%= sale.basket_id %>/delivery/check">
+                  <input name="address" placeholder="Delivery address" value="<%= sale.delivery_address || sale.buyer_address || '' %>" />
+                  <button type="submit" class="btn">Check delivery</button>
+                </form>
+                <form class="action-form" method="post" action="/fulfillment/sales/<%= sale.basket_id %>/complete">
+                  <button type="submit" class="btn">Complete basket</button>
+                </form>
+              </div>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="section-title">Session actions</div>
+          <% const sessionIds = [...new Set(sales.map((sale) => sale.session_id))]; %>
+          <% if (!sessionIds.length) { %>
+            <p class="muted">No session with sales yet.</p>
+          <% } %>
+          <% sessionIds.forEach((sessionId) => { %>
+            <div class="session-row">
+              <div class="session-id"><%= sessionId %></div>
+              <div class="session-btns">
+                <form method="post" action="/fulfillment/sessions/<%= sessionId %>/captain-payments/calculate" style="margin:0;">
+                  <button type="submit" class="btn">Captain payouts</button>
+                </form>
+                <form method="post" action="/fulfillment/sessions/<%= sessionId %>/close" style="margin:0;">
+                  <button type="submit" class="btn btn-danger">Close auction</button>
+                </form>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Captain payouts</div>
+          <% if (!dashboard.captainPayments.length) { %>
+            <p class="muted">No captain payout calculated yet.</p>
+          <% } else { %>
+            <table>
+              <thead>
+                <tr>
+                  <th>Captain / Boat</th>
+                  <th>Net</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% dashboard.captainPayments.forEach((payment) => { %>
+                  <tr>
+                    <td>
+                      <strong><%= payment.captain_name || payment.member_id || 'Unknown Captain' %></strong><br />
+                      <span class="muted"><%= payment.boat_name %></span>
+                    </td>
+                    <td>
+                      <strong><%= Number(payment.net_amount).toFixed(2) %></strong><br />
+                      <span class="muted">Gross <%= Number(payment.gross_amount).toFixed(2) %>, commission <%= Number(payment.commission_amount).toFixed(2) %></span>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/main.js"></script>
+  </body>
+</html>

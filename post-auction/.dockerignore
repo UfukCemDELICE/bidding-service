@@ -1,0 +1,7 @@
+node_modules
+.git
+.tmp
+*.md
+api-key-*.txt
+.env
+*.log

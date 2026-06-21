@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "user.member.registered",
+  "title": "user.member.registered",
+  "description": "A cooperative member/captain has registered with boat information. Produced by the User & Membership Service (1); consumed by the Post-Auction & Fulfillment Service (4) for captain payment reports.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eventId", "memberId", "memberName", "boatName", "occurredAt"],
+  "properties": {
+    "eventName": { "type": "string", "description": "Optional self-describing event type; equals the topic name. Not required." },
+    "eventId": { "type": "string", "format": "uuid" },
+    "memberId": { "type": "string", "minLength": 1 },
+    "memberName": { "type": "string", "minLength": 1 },
+    "boatName": { "type": "string", "minLength": 1 },
+    "email": { "type": "string", "format": "email" },
+    "phone": { "type": "string" },
+    "occurredAt": { "type": "string", "format": "date-time" }
+  }
+}

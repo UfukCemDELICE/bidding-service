@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "fulfillment.captain.payment.calculated",
+  "title": "fulfillment.captain.payment.calculated",
+  "description": "The amount to be paid to a captain/member for sold baskets in an auction session has been calculated. Produced by the Post-Auction & Fulfillment Service (4).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eventId", "sessionId", "boatName", "grossAmount", "commissionAmount", "netAmount", "basketIds", "occurredAt"],
+  "properties": {
+    "eventName": { "type": "string", "description": "Optional self-describing event type; equals the topic name. Not required." },
+    "eventId": { "type": "string", "format": "uuid" },
+    "sessionId": { "type": "string", "minLength": 1 },
+    "memberId": { "type": "string", "minLength": 1 },
+    "captainName": { "type": "string", "minLength": 1 },
+    "boatName": { "type": "string", "minLength": 1 },
+    "grossAmount": { "type": "number", "minimum": 0 },
+    "commissionAmount": { "type": "number", "minimum": 0 },
+    "netAmount": { "type": "number", "minimum": 0 },
+    "basketIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "occurredAt": { "type": "string", "format": "date-time" }
+  }
+}
