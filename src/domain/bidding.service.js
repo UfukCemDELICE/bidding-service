@@ -200,12 +200,17 @@ async function getAuctionDashboard(sessionId) {
     [sessionId]
   );
 
+  const buyersResult = await pool.query(
+    `SELECT buyer_id, name FROM buyers_projection ORDER BY name ASC`
+  );
+
   return {
     session: sessionResult.rows[0],
     baskets: basketsResult.rows,
     currentBasket,
     bids: bidsResult.rows,
     rebidQueue: rebidQueueResult.rows,
+    buyers: buyersResult.rows,
     sales: []
   };
 }
