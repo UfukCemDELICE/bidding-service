@@ -171,7 +171,7 @@ If you are integrating with Confluent Cloud or a corporate Kafka platform, map y
 
 | Environment Variable Name | Note / Details |
 | :--- | :--- |
-| `KAFKA_BROKERS` | Comma-separated list of brokers |
+| `KAFKA_BROKERS` | Broker address (e.g. `localhost:9092`) |
 | `KAFKA_SASL_USERNAME` | Kafka security username credential |
 | `KAFKA_SASL_PASSWORD` | Kafka security password credential |
 
@@ -180,12 +180,12 @@ If you are integrating with Confluent Cloud or a corporate Kafka platform, map y
 
 ```env
 PORT=3000
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/bid_service
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/bidding_service
 
 # PostgreSQL Connection Override (Optional, used if DATABASE_URL is not set)
 # PGHOST=localhost
 # PGPORT=5432
-# PGDATABASE=bid_service
+# PGDATABASE=bidding_service
 # PGUSER=postgres
 # PGPASSWORD=postgres
 # PGSSL=false
@@ -195,9 +195,7 @@ KAFKA_CLIENT_ID=auction-bidding-service
 KAFKA_GROUP_ID=auction-bidding-service
 KAFKA_BROKERS=localhost:9092
 
-# SASL/SSL Configuration (Set KAFKA_SSL=true and supply username/password for Confluent Cloud)
-KAFKA_SSL=true
-KAFKA_SSL_REJECT_UNAUTHORIZED_FALSE=false
+# SASL/SSL Configuration (SSL is always enabled; supply username/password for Confluent Cloud)
 KAFKA_SASL_USERNAME=<api-key>
 KAFKA_SASL_PASSWORD=<api-secret>
 ```
@@ -262,7 +260,6 @@ The service implements an event-driven flow, subscribing to catalog and user top
 * **Key**: All published events use `sessionId` as their message key to ensure ordered processing of a session's events on the Kafka partition.
 * **Format**: Payloads are serialized as JSON.
 * **Envelope Fields**: Every event includes `eventId` (UUID) and `occurredAt` (ISO timestamp) inside the payload.
-* **Headers**: Every published message includes headers for `content-type` (`application/json`) and `eventType` (matching the topic name).
 
 ### A. Consumed Events
 
@@ -468,7 +465,7 @@ The Express server exposes the following controller-backed endpoints:
   * **Transitions**: Basket: `LISTED` or `REBID_READY` -> `OPEN`.
   * **Events Published**: `auction.basket.opened`
 * **`POST /auction/:sessionId/baskets/:basketId/bid`**
-  * **Purpose**: Submits a bid from a buyer. Validates that the amount exceeds the base price and the current highest bid, and that the bidder exists.
+  * **Purpose**: Submits a bid from a buyer. Validates that the amount meets or equals the base price (≥) and exceeds the current highest bid (>), and that the bidder exists.
   * **Transitions**: None (registers bid and updates `highest_bid` on basket).
   * **Events Published**: `bid.placed`
 * **`POST /auction/:sessionId/baskets/:basketId/close`**

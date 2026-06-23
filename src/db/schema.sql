@@ -5,7 +5,6 @@ DROP TABLE IF EXISTS auction_baskets CASCADE;
 DROP TABLE IF EXISTS auction_sessions CASCADE;
 DROP TABLE IF EXISTS buyers_projection CASCADE;
 DROP TABLE IF EXISTS catalog_baskets_projection CASCADE;
-DROP TABLE IF EXISTS sale_records CASCADE;
 
 CREATE TABLE buyers_projection (
   buyer_id VARCHAR(100) PRIMARY KEY,

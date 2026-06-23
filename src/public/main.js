@@ -89,10 +89,6 @@
     refreshSoon("Basket closed. Refreshing view...");
   });
 
-  socket.on("paymentConfirmed", function () {
-    refreshSoon("Payment confirmed. Refreshing view...");
-  });
-
   socket.on("auctionFinalized", function () {
     refreshSoon("Auction finalized. Refreshing view...");
   });
